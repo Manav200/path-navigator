@@ -1,15 +1,23 @@
 // app/api/checkout/razorpay/route.ts
-// Mock Razorpay checkout endpoint.
-// In production: integrate with Razorpay Orders API using RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET.
-// Returns a mock order object compatible with the Razorpay Web SDK interface.
+// Production Razorpay Order creation and signature verification route.
+// Handles checkout requests with the official Razorpay SDK.
 
 import { NextRequest, NextResponse } from "next/server";
+import { razorpayInstance, verifyRazorpaySignature } from "@/lib/razorpay";
 import { calculatePricing } from "@/lib/mentorData";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { mentorId, mentorName, slotDate, slotTime, basePrice, studentEmail } = body;
+    const {
+      mentorId,
+      mentorName,
+      slotDate,
+      slotTime,
+      basePrice,
+      studentEmail,
+      studentName,
+    } = body;
 
     if (!mentorId || !basePrice || !slotDate || !slotTime) {
       return NextResponse.json(
@@ -19,74 +27,93 @@ export async function POST(request: NextRequest) {
     }
 
     const pricing = calculatePricing(Number(basePrice));
+    const amountInPaise = Math.round(pricing.total * 100);
+    const receipt = `pn_rcpt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
 
-    // ── Mock Order (replace with real Razorpay Orders API call) ────────────────
-    // Real implementation:
-    //   const Razorpay = require("razorpay");
-    //   const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
-    //   const order = await instance.orders.create({ amount: pricing.total * 100, currency: "INR", receipt: `pn_${Date.now()}` });
-
-    const mockOrderId = `order_mock_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
-    const order = {
-      id: mockOrderId,
-      entity: "order",
-      amount: pricing.total * 100,       // paise
-      amount_paid: 0,
-      amount_due: pricing.total * 100,
+    // Create authentic Razorpay order via SDK
+    const order = await razorpayInstance.orders.create({
+      amount: amountInPaise,
       currency: "INR",
-      receipt: `pn_session_${Date.now()}`,
-      status: "created",
-      // Metadata
+      receipt,
       notes: {
-        mentorId,
-        mentorName,
-        slotDate,
-        slotTime,
-        studentEmail: studentEmail || "guest@pathnavigate.in",
+        mentorId: String(mentorId),
+        mentorName: mentorName || "Industry Mentor",
+        slotDate: String(slotDate),
+        slotTime: String(slotTime),
+        studentEmail: studentEmail || "",
+        studentName: studentName || "",
       },
-      // Pricing breakdown for client
+    });
+
+    return NextResponse.json({
+      id: order.id,
+      entity: order.entity,
+      amount: order.amount,
+      amount_paid: order.amount_paid,
+      amount_due: order.amount_due,
+      currency: order.currency,
+      receipt: order.receipt,
+      status: order.status,
+      notes: order.notes,
       pricing: {
         basePrice: pricing.basePrice,
         platformFee: pricing.platformFee,
         total: pricing.total,
       },
-      // Mock Razorpay key (replace with env var in production)
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_mock_key",
-    };
-
-    return NextResponse.json(order);
-  } catch (err) {
-    console.error("[Razorpay] Order creation error:", err);
-    return NextResponse.json({ error: "Order creation failed" }, { status: 500 });
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+    });
+  } catch (err: unknown) {
+    const errorMsg =
+      err instanceof Error
+        ? err.message
+        : typeof err === "object" && err !== null
+        ? JSON.stringify(err)
+        : String(err);
+    console.error("[Razorpay Orders API Error]:", errorMsg);
+    return NextResponse.json(
+      { error: "Failed to create Razorpay order", details: errorMsg },
+      { status: 502 }
+    );
   }
 }
 
-// Webhook verification (POST /api/checkout/razorpay/verify)
+// Server-side signature verification endpoint
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
 
-    if (!razorpay_order_id || !razorpay_payment_id) {
-      return NextResponse.json({ error: "Missing payment IDs" }, { status: 400 });
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return NextResponse.json(
+        { error: "Missing payment verification parameters" },
+        { status: 400 }
+      );
     }
 
-    // ── Mock signature verification ─────────────────────────────────────────
-    // Real implementation:
-    //   const crypto = require("crypto");
-    //   const generated = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    //     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-    //     .digest("hex");
-    //   if (generated !== razorpay_signature) return NextResponse.json({ error: "Signature mismatch" }, { status: 400 });
+    const isValid = verifyRazorpaySignature(
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
+    );
+
+    if (!isValid) {
+      return NextResponse.json(
+        { verified: false, error: "Invalid signature" },
+        { status: 400 }
+      );
+    }
 
     return NextResponse.json({
       verified: true,
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
     });
-  } catch (err) {
-    console.error("[Razorpay] Webhook error:", err);
-    return NextResponse.json({ error: "Verification failed" }, { status: 500 });
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error("[Razorpay Signature Verification Error]:", errorMsg);
+    return NextResponse.json(
+      { error: "Verification failed", details: errorMsg },
+      { status: 500 }
+    );
   }
 }

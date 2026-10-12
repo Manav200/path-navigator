@@ -1,5 +1,5 @@
 // lib/mentorData.ts
-// Vetted mentor data models and mock roster for the PathNavigate 1:1 Mentorship Marketplace.
+// Mentor data models and initial seed roster for the PathNavigate 1:1 Mentorship Marketplace.
 // Maps each mentor to a launch profession (roleId) with credentials, pricing, slots, and bio.
 
 export interface MentorSlot {
@@ -98,7 +98,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Hindi"],
     email: "arjun.sharma@gmail.com",
     googleEmail: "arjun.sharma.mentorship@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
   {
     id: "mentor-se-002",
@@ -119,7 +118,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Malayalam"],
     email: "priya.nair@microsoft.com",
     googleEmail: "priya.nair.cloud@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
   {
     id: "mentor-se-003",
@@ -140,7 +138,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Hindi", "Gujarati"],
     email: "rohan.mehta@flipkart.com",
     googleEmail: "rohan.mehta.ml@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
 
   // ── Business Analyst ──
@@ -163,7 +160,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Hindi"],
     email: "deepika.verma@mckinsey.com",
     googleEmail: "deepika.verma.consult@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
   {
     id: "mentor-ba-002",
@@ -184,7 +180,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Tamil", "Kannada"],
     email: "karthik.iyer@razorpay.com",
     googleEmail: "karthik.iyer.analytics@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
 
   // ── Lawyer ──
@@ -207,7 +202,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Hindi", "Kannada"],
     email: "meera.krishna@delhihc.in",
     googleEmail: "adv.meera.krishnamurthy@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
   {
     id: "mentor-law-002",
@@ -228,7 +222,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Hindi"],
     email: "vikram.anand@tcs.com",
     googleEmail: "adv.vikram.anand@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
 
   // ── Doctor ──
@@ -251,7 +244,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Malayalam", "Hindi"],
     email: "ananya.pillai@aiims.edu",
     googleEmail: "dr.ananya.pillai.med@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
   {
     id: "mentor-doc-002",
@@ -272,7 +264,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Bengali", "Hindi"],
     email: "rahul.bose@fortis.in",
     googleEmail: "dr.rahul.bose.cardio@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
 
   // ── Pharmacist ──
@@ -295,7 +286,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Marathi", "Hindi"],
     email: "sneha.kulkarni@sunpharma.com",
     googleEmail: "dr.sneha.kulkarni.pharma@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
   {
     id: "mentor-ph-002",
@@ -316,7 +306,6 @@ export const MENTORS: Mentor[] = [
     languages: ["English", "Telugu", "Hindi"],
     email: "aditya.rao@apollo.in",
     googleEmail: "dr.aditya.rao.pharmd@gmail.com",
-    googleMeetLink: "https://meet.google.com/new",
   },
 ];
 

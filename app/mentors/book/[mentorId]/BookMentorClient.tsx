@@ -6,7 +6,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import {
   getMentorById,
   calculatePricing,
@@ -14,16 +14,15 @@ import {
   generateMeetLink,
   generateGoogleCalendarUrl,
   BookedSession,
-  Mentor,
 } from "@/lib/mentorData";
 import SlotGrid from "@/components/mentors/SlotGrid";
 import RazorpayCheckoutButton from "@/components/checkout/RazorpayCheckoutButton";
 import { useAuthUserStore } from "@/store/useAuthUserStore";
 import { buildSlotId } from "@/lib/slotLockEngine";
 
+
 export default function BookMentorClient() {
   const params = useParams();
-  const router = useRouter();
   const mentorId = typeof params.mentorId === "string" ? params.mentorId : "";
 
   const mentor = useMemo(() => getMentorById(mentorId), [mentorId]);
@@ -47,7 +46,6 @@ export default function BookMentorClient() {
   } | null>(null);
 
   // Payment & status states
-  const [isProcessing, setIsProcessing] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<BookedSession | null>(null);
 
@@ -103,138 +101,8 @@ export default function BookMentorClient() {
     );
   }
 
-  // Handle Checkout with Razorpay
-  const handleProceedToPayment = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg(null);
-
-    if (!selectedDate || !selectedTime) {
-      setErrorMsg("Please select a date and an available time slot.");
-      return;
-    }
-    if (!studentName.trim() || !studentEmail.trim()) {
-      setErrorMsg("Please enter your name and email address.");
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      const activeSlotId =
-        lockedSlotData?.slotId || buildSlotId(mentor.id, selectedDate, selectedTime);
-
-      // 1. Acquire/Verify Atomic Pre-Lock on slot before initiating payment
-      const lockRes = await fetch("/api/checkout/lock-slot", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slotId: activeSlotId,
-          mentorId: mentor.id,
-          studentId: studentId,
-          date: selectedDate,
-          time: selectedTime,
-        }),
-      });
-
-      const lockPayload = await lockRes.json();
-
-      if (lockRes.status === 409 || !lockRes.ok) {
-        throw new Error(
-          lockPayload.message ||
-            "This slot was just selected by another student. Please choose an alternative time."
-        );
-      }
-
-      // 2. Create order via Razorpay API
-      const res = await fetch("/api/checkout/razorpay", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mentorId: mentor.id,
-          mentorName: mentor.name,
-          slotDate: selectedDate,
-          slotTime: selectedTime,
-          basePrice: basePrice,
-          studentEmail: studentEmail,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error("Unable to create checkout order. Please try again.");
-      }
-
-      const orderData = await res.json();
-      const mockPayId = `pay_mock_${Date.now()}`;
-
-      // 3. Trigger Payment Webhook to atomically convert slot from 'locked_pending' to 'booked'
-      const webhookRes = await fetch("/api/checkout/webhook", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slotId: activeSlotId,
-          mentorId: mentor.id,
-          studentId: studentId,
-          paymentOrderId: orderData.id,
-          paymentId: mockPayId,
-          signature: "mock_signature_success",
-          date: selectedDate,
-          time: selectedTime,
-          meetLink: mentor.googleMeetLink || generateMeetLink(mentor),
-        }),
-      });
-
-      const webhookData = await webhookRes.json();
-      const confirmedMeetLink =
-        webhookData.meetLink ||
-        mentor.googleMeetLink ||
-        generateMeetLink(mentor);
-
-      const calendarInvite = generateGoogleCalendarUrl({
-        title: `1:1 Mentorship Session: ${mentor.name} & ${studentName.trim() || studentProfile?.name || "Scholar"}`,
-        description: `Career consultation session.\nAgenda: ${agenda.trim() || "General career & pathway progression discussion."}`,
-        mentorEmail: mentor.googleEmail || mentor.email,
-        studentEmail: studentEmail.trim() || studentProfile?.email,
-        date: selectedDate,
-        time: selectedTime,
-        meetLink: confirmedMeetLink,
-      });
-
-      // 4. Save booked session to local registry
-      const newSession: BookedSession = {
-        id: webhookData.bookingId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        mentorId: mentor.id,
-        mentorName: mentor.name,
-        mentorDesignation: `${mentor.designation} · ${mentor.company}`,
-        mentorEmail: mentor.email,
-        mentorGoogleEmail: mentor.googleEmail || mentor.email,
-        roleId: mentor.roleId,
-        studentId: studentId,
-        studentName: studentName.trim() || studentProfile?.name || "Candidate Scholar",
-        studentEmail: studentEmail.trim() || studentProfile?.email || "candidate@pathnavigate.in",
-        studentAcademic: studentProfile?.degree
-          ? `${studentProfile.degree} · ${studentProfile.institution || "PathNavigate Scholar"}`
-          : "Undergraduate Candidate",
-        date: selectedDate,
-        time: selectedTime,
-        meetLink: confirmedMeetLink,
-        calendarEventUrl: calendarInvite,
-        questions: agenda.trim() || "General career & pathway progression discussion.",
-        status: "upcoming",
-        amountPaid: pricing.total,
-        mentorHonorarium: pricing.basePrice,
-        payoutStatus: "settled",
-        bookedAt: Date.now(),
-      };
-
-      saveBookedSession(newSession);
-      setConfirmedBooking(newSession);
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(err.message || "An unexpected error occurred during booking.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  // Called by RazorpayCheckoutButton after successful payment & server verification
+  // Receives the actual Razorpay payment IDs and server-generated booking data
 
   const handlePaymentSuccess = (paymentData: {
     paymentId: string;

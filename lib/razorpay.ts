@@ -9,7 +9,9 @@ const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KE
 const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
 if (!keyId || !keySecret) {
-  throw new Error("Razorpay API keys are missing in environment variables.");
+  throw new Error(
+    "Razorpay API keys are missing. Set NEXT_PUBLIC_RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in your environment."
+  );
 }
 
 export const razorpayInstance = new Razorpay({
@@ -28,14 +30,6 @@ export function verifyRazorpaySignature(
 ): boolean {
   if (!orderId || !paymentId || !signature || !secret) {
     return false;
-  }
-
-  // Allow sandbox mock signature pass-through for development testing
-  if (
-    signature === "mock_signature_success" ||
-    signature.startsWith("mock_sig_")
-  ) {
-    return true;
   }
 
   try {
@@ -68,11 +62,6 @@ export function verifyWebhookSignature(
 ): boolean {
   if (!rawBody || !signature || !secret) {
     return false;
-  }
-
-  // Allow development mock webhook signature
-  if (signature === "mock_signature_success" || signature.startsWith("mock_")) {
-    return true;
   }
 
   try {

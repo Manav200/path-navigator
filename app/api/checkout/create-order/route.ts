@@ -65,9 +65,9 @@ export async function POST(request: NextRequest) {
     }
 
     // ── STEP 2: Create Razorpay Order ───────────────────────────────────────
-    let order: any;
     const receiptId = `pn_rcpt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
 
+    let order;
     try {
       order = await razorpayInstance.orders.create({
         amount: amountInPaise,
@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
           studentId,
           date,
           time,
-          studentEmail: studentEmail || "candidate@pathnavigate.in",
-          studentName: studentName || "Candidate Scholar",
+          studentEmail: studentEmail || "",
+          studentName: studentName || "",
           agenda: (agenda || "").slice(0, 200),
         },
       });
@@ -89,57 +89,34 @@ export async function POST(request: NextRequest) {
         apiErr?.error?.description ||
         apiErr?.message ||
         (typeof apiErr === "object" ? JSON.stringify(apiErr) : String(apiErr));
-      console.warn("[Razorpay API Orders Create Error / Fallback]:", errorMsg);
-
-      // In local dev/sandbox mode without active live keys, generate compliant fallback order
-      order = {
-        id: `order_sb_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        entity: "order",
-        amount: amountInPaise,
-        amount_paid: 0,
-        amount_due: amountInPaise,
-        currency: "INR",
-        receipt: receiptId,
-        status: "created",
-        isMock: true,
-        errorReason: errorMsg,
-        notes: {
-          slotId: targetSlotId,
-          mentorId,
-          studentId,
-          date,
-          time,
-          studentEmail: studentEmail || "candidate@pathnavigate.in",
-          studentName: studentName || "Candidate Scholar",
+      console.error("[Razorpay API Orders Create Error]:", errorMsg);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Failed to create Razorpay order. Please verify your API keys and try again.",
+          details: errorMsg,
         },
-      };
+        { status: 502 }
+      );
     }
-
-    const isMock = Boolean(
-      order.isMock ||
-      !process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-      process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID.includes("pathnavigate_sandbox")
-    );
 
     // ── STEP 3: Return Order & Lock Credentials ─────────────────────────────
     return NextResponse.json(
       {
         success: true,
         orderId: order.id,
-        order,
-        isMock,
         slotId: targetSlotId,
         lockExpiration: lockResult.lockExpiration,
         paymentOrderId: lockResult.paymentOrderId,
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_pathnavigate_sandbox",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: amountInPaise,
         currency: "INR",
         pricing,
         mentor: {
           id: mentor?.id || mentorId,
-          name: mentor?.name || "Industry Mentor",
-          designation: mentor?.designation || "Senior Specialist",
-          company: mentor?.company || "Tech",
+          name: mentor?.name || "",
+          designation: mentor?.designation || "",
+          company: mentor?.company || "",
         },
       },
       { status: 200 }
