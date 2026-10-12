@@ -105,50 +105,68 @@ export default function HomePage() {
         </div>
 
         {/* Navigation & Auth Status */}
-        <div className="flex items-center gap-3 font-label text-xs">
+        <div className="flex items-center gap-3 sm:gap-4 font-label text-xs">
+          <nav className="hidden lg:flex items-center gap-4 text-slate-600 font-semibold tracking-wider uppercase text-[11px]">
+            <Link href="/mentors/software-engineer" className="hover:text-[#094cb2] transition">
+              1:1 Mentors
+            </Link>
+            <Link href="/register/mentor" className="text-[#6d5e00] hover:text-amber-800 transition">
+              ✦ Become Mentor
+            </Link>
+            <Link href="/dashboard/sessions" className="hover:text-[#094cb2] transition">
+              Sessions
+            </Link>
+            <Link href="/profile" className="px-2.5 py-1 rounded-sm bg-slate-100 hover:bg-slate-200 text-slate-800 transition">
+              Profile Workspace
+            </Link>
+          </nav>
+
           {mounted && user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-slate-500 hidden md:inline">
-                {user.isAnonymous ? "Guest Scholar" : user.displayName || user.email}
-              </span>
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <Link
+                href="/profile"
+                className="px-3 py-1.5 rounded-sm border border-slate-200 bg-white text-slate-700 hover:border-[#094cb2] hover:text-[#094cb2] font-semibold transition shadow-2xs text-xs"
+              >
+                👤 Profile
+              </Link>
               {hasAssessment ? (
                 <Link
                   href="/results"
-                  className="px-4 py-2 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-semibold transition shadow-xs flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-semibold transition shadow-xs flex items-center gap-1.5"
                 >
-                  <span>View Diagnostic Dossier</span>
+                  <span>Dossier</span>
                   <span>→</span>
                 </Link>
               ) : (
                 <Link
                   href="/assessment"
-                  className="px-4 py-2 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-semibold transition shadow-xs flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-semibold transition shadow-xs flex items-center gap-1.5"
                 >
-                  <span>Begin Examination</span>
+                  <span>Diagnostic</span>
                   <span>→</span>
                 </Link>
               )}
               <button
                 type="button"
                 onClick={() => logout()}
-                className="px-3 py-2 text-slate-500 hover:text-slate-800 transition uppercase tracking-wider"
+                className="px-2 py-1.5 text-slate-500 hover:text-slate-800 transition uppercase tracking-wider text-[11px]"
               >
                 Sign Out
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <Link
-                href="/login"
-                className="px-3.5 py-2 text-slate-700 hover:text-[#094cb2] font-semibold transition"
+                href="/profile"
+                className="px-3 py-1.5 rounded-sm border border-slate-200 bg-white text-slate-700 hover:border-[#094cb2] hover:text-[#094cb2] font-semibold transition shadow-2xs text-xs"
               >
-                Sign In
+                👤 Profile
               </Link>
               <Link
                 href="/assessment"
-                className="px-4 py-2 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-semibold transition shadow-xs"
+                className="px-3.5 py-1.5 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-semibold transition shadow-xs text-xs"
               >
-                Take Diagnostic Free →
+                Diagnostic →
               </Link>
             </div>
           )}

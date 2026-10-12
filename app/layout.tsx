@@ -48,7 +48,9 @@ export default function RootLayout({
             <DemoPresetBar />
           </Suspense>
           <div className="flex-1 flex flex-col">{children}</div>
-          <FeedbackWidget />
+          <Suspense fallback={null}>
+            <FeedbackWidget />
+          </Suspense>
         </AuthProvider>
       </body>
     </html>

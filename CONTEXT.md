@@ -58,3 +58,21 @@ PathNavigate is an AI-driven career discovery and DAG-based experiential learnin
 ### Creative, Design & Legal
 - UI/UX & Product Designer
 - Lawyer / Corporate Legal Specialist
+
+## Extended Stack Rules
+- Payments: Razorpay API / Webhooks
+- Calendar Scheduling: Cal.com API / Google Calendar OAuth
+
+## Extended Page Architecture
+- `/mentors/[roleId]` - Role-specific Mentor Directory
+- `/mentors/book/[mentorId]` - Booking & Razorpay Payment Checkout
+- `/dashboard/sessions` - Student Scheduled & Past Sessions Management
+
+## Tech Stack Rules & Authentication
+- User Roles: `student` | `mentor` (stored in Firebase User Profile / Auth State)
+
+## Page Architecture
+- `/register` - Role selection ("Student" vs "Mentor") and dedicated signup flow
+- `/register/mentor` - Detailed Mentor Verification & Credentials Form
+- `/profile` - Universal Profile Management Workspace (allows editing profile data anytime)
+- `/mentors/[roleId]` - Dynamic Mentor Directory (powered by registered mentors)
