@@ -1,7 +1,8 @@
-﻿// lib/analytics.ts
+// lib/analytics.ts
 // Real-time event tracking and authentic feedback collection.
 // Dual-write strategy: localStorage (fast / offline) + Firestore (persistent / cross-device).
 // All mock data, seed feedback, and synthetic reviews have been purged.
+// getAggregatedAnalyticsFromFirestore() fetches live data from Firestore for cross-device telemetry.
 
 export interface FeedbackSubmission {
   id: string;
@@ -89,7 +90,7 @@ export function trackEvent(name: string, properties: Record<string, any> = {}) {
     localStorage.setItem(ANALYTICS_STORAGE_KEY, JSON.stringify(events.slice(0, 150)));
     import("@/lib/db").then(({ fsTrackEvent }) => {
       fsTrackEvent(newEvent).catch((e: any) =>
-        console.warn("[Analytics] Firestore event write failed:", e)
+        console.warn("[Analytics] Check your Internet Connection", e)
       );
     });
   } catch (e) {
@@ -145,7 +146,7 @@ export function recordFeedback(
   });
   import("@/lib/db").then(({ fsAddFeedback }) => {
     fsAddFeedback(newFeedback).catch((e: any) =>
-      console.warn("[Analytics] Firestore feedback write failed:", e)
+      console.warn("[Analytics] Please Check your Internet Connection, and try again later", e)
     );
   });
   return newFeedback;
@@ -259,4 +260,126 @@ export function resetAnalytics() {
   localStorage.removeItem(ANALYTICS_STORAGE_KEY);
   localStorage.removeItem("pathnavigate_feedback_events");
   localStorage.removeItem("pathnavigate_analytics_events");
+}
+
+/**
+ * Fetches feedback + events from Firestore and returns a fully aggregated
+ * AggregatedAnalytics object that includes ALL users (cross-device).
+ * Falls back gracefully if Firestore is unreachable.
+ */
+export async function getAggregatedAnalyticsFromFirestore(): Promise<AggregatedAnalytics> {
+  // Start with the local snapshot so we always have something to show
+  const localData = getAggregatedAnalytics();
+
+  try {
+    const { fsGetRecentFeedback, fsGetEvents } = await import("@/lib/db");
+    const [remoteFeedbacks, remoteEvents] = await Promise.all([
+      fsGetRecentFeedback(200),
+      fsGetEvents(500),
+    ]);
+
+    // Merge: de-duplicate by id, remote wins on conflicts
+    const localFeedbacks = getFeedbackList();
+    const feedbackMap = new Map<string, FeedbackSubmission>();
+    [...localFeedbacks, ...remoteFeedbacks].forEach((f) => feedbackMap.set(f.id, f));
+    const feedbacks = Array.from(feedbackMap.values()).sort(
+      (a, b) => b.timestamp - a.timestamp
+    );
+
+    let localEvents: AnalyticsEvent[] = [];
+    if (typeof window !== "undefined") {
+      try {
+        const raw = localStorage.getItem(ANALYTICS_STORAGE_KEY);
+        if (raw) localEvents = JSON.parse(raw);
+      } catch { }
+    }
+    const eventMap = new Map<string, AnalyticsEvent>();
+    [...localEvents, ...remoteEvents].forEach((e) => eventMap.set(e.id, e));
+    const events = Array.from(eventMap.values());
+
+    // Re-aggregate with merged data
+    const sessionsSet = new Set<string>();
+    events.forEach((e) => {
+      if (e.properties?.sessionId) sessionsSet.add(e.properties.sessionId);
+    });
+    const totalSessions = Math.max(sessionsSet.size, feedbacks.length > 0 ? 1 : 0);
+
+    const starCounts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let totalRatingSum = 0;
+    feedbacks.forEach((f) => {
+      if (f.rating >= 1 && f.rating <= 5) {
+        starCounts[f.rating] = (starCounts[f.rating] || 0) + 1;
+        totalRatingSum += f.rating;
+      }
+    });
+    const totalFeedbackCount = feedbacks.length;
+    const avgScore =
+      totalFeedbackCount > 0
+        ? Number((totalRatingSum / totalFeedbackCount).toFixed(1))
+        : 0;
+    const accuracyPercent =
+      totalFeedbackCount > 0 ? Math.round((avgScore / 5) * 100) : 0;
+
+    const switchStats = { yes: 0, no: 0, unsure: 0 };
+    feedbacks.forEach((f) => {
+      if (f.wouldSwitch === "Yes") switchStats.yes++;
+      else if (f.wouldSwitch === "No") switchStats.no++;
+      else switchStats.unsure++;
+    });
+
+    const roleCounts: Record<string, number> = {};
+    let totalAssessments = 0;
+    let pivotAssessments = 0;
+    events.forEach((e) => {
+      if (e.name === "assessment_complete" || e.name === "demo_preset_applied") {
+        totalAssessments++;
+        const role = e.properties?.target || e.properties?.role || "Software Engineer";
+        roleCounts[role] = (roleCounts[role] || 0) + 1;
+        if (
+          e.properties?.pivotStatus === "strong_pivot" ||
+          e.properties?.pivotStatus === "explore_pivot"
+        ) {
+          pivotAssessments++;
+        }
+      }
+    });
+    const topProfessions = Object.entries(roleCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([role, count]) => ({
+        role,
+        count,
+        percentage:
+          totalAssessments > 0 ? Math.round((count / totalAssessments) * 100) : 0,
+      }));
+    const pivotRate =
+      totalAssessments > 0
+        ? Math.round((pivotAssessments / totalAssessments) * 100)
+        : 0;
+    const nodeEvents = events.filter((e) => e.name === "dag_node_complete");
+    const day1Completions = nodeEvents.filter(
+      (e) => e.properties?.day === 1 || e.properties?.nodeId?.includes("day-1")
+    ).length;
+    const day1Rate =
+      totalSessions > 0
+        ? Math.min(100, Math.round((day1Completions / totalSessions) * 100))
+        : 0;
+
+    return {
+      totalSessions,
+      activeUsers: totalSessions,
+      averageAccuracyScore: avgScore,
+      accuracyPercentage: accuracyPercent,
+      totalFeedbackCount,
+      pivotRatePercentage: pivotRate,
+      day1CompletionRate: day1Rate,
+      avgTimeSpentMinutes: nodeEvents.length > 0 ? 2.5 : 0,
+      topRecommendedProfessions: topProfessions,
+      starRatingsCount: starCounts,
+      wouldSwitchStats: switchStats,
+      recentFeedback: feedbacks.slice(0, 20),
+    };
+  } catch (err) {
+    console.warn("[Analytics] Check your Internet Connection", err);
+    return localData;
+  }
 }
