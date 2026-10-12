@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: var(--font-noto-serif), "Noto Serif", Georgia, serif;
+  --font-sans: var(--font-inter), "Inter", sans-serif;
+  --font-label: var(--font-public-sans), "Public Sans", sans-serif;
+
+  --color-primary: #094cb2;
+  --color-primary-container: #1d63d8;
+
+  --color-tertiary: #6d5e00;
+  --color-tertiary-container: #fef3c7;
+  --color-tertiary-foreground: #453b00;
+
+  --color-surface-lowest: #ffffff;
+  --color-surface-low: #f8fafc;
+  --color-surface-container: #f1f5f9;
+  --color-surface-high: #e2e8f0;
+  --color-surface-dim: #cbd5e1;
+
+  --color-outline-ghost: rgba(148, 163, 184, 0.15);
+}
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Editorial subtle borders and typography rules */
+.font-serif {
+  font-family: var(--font-noto-serif), "Noto Serif", Georgia, serif;
+}
+
+.font-sans {
+  font-family: var(--font-inter), "Inter", sans-serif;
+}
+
+.font-label {
+  font-family: var(--font-public-sans), "Public Sans", sans-serif;
+}
+
+/* Archival paper rule styling */
+.editorial-rule {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.editorial-rule-double {
+  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 2px 0;
+}
