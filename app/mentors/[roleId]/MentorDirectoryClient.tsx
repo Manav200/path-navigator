@@ -164,9 +164,13 @@ export default function MentorDirectoryClient() {
         </div>
         <nav className="flex items-center gap-3 sm:gap-4 font-label text-xs text-slate-500">
           <Link href={`/pathway/${roleId}`} className="hover:text-[#094cb2] transition hidden sm:inline">DAG Skill Tree</Link>
-          <Link href="/dashboard/sessions" className="hover:text-[#094cb2] transition">Sessions</Link>
+          <Link href="/register/student" className="hover:text-[#094cb2] transition hidden md:inline">Student Registration</Link>
           <Link href="/register/mentor" className="text-[#6d5e00] hover:text-amber-800 transition font-semibold">
             ✦ Join as Mentor
+          </Link>
+          <Link href="/dashboard/sessions" className="hover:text-[#094cb2] transition">Sessions</Link>
+          <Link href="/login" className="px-2.5 py-1 rounded-sm border border-slate-300 hover:border-[#094cb2] hover:text-[#094cb2] bg-white text-slate-800 font-semibold transition">
+            Log In
           </Link>
           <Link href="/profile" className="px-2.5 py-1 rounded-sm bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold transition">
             Profile 👤

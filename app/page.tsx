@@ -110,8 +110,11 @@ export default function HomePage() {
             <Link href="/mentors/software-engineer" className="hover:text-[#094cb2] transition">
               1:1 Mentors
             </Link>
+            <Link href="/register/student" className="hover:text-[#094cb2] transition">
+              Student Registration
+            </Link>
             <Link href="/register/mentor" className="text-[#6d5e00] hover:text-amber-800 transition">
-              ✦ Become Mentor
+              ✦ Mentor Registration
             </Link>
             <Link href="/dashboard/sessions" className="hover:text-[#094cb2] transition">
               Sessions
@@ -155,18 +158,18 @@ export default function HomePage() {
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Link
-                href="/profile"
-                className="px-3 py-1.5 rounded-sm border border-slate-200 bg-white text-slate-700 hover:border-[#094cb2] hover:text-[#094cb2] font-semibold transition shadow-2xs text-xs"
+                href="/login"
+                className="px-3.5 py-1.5 rounded-sm border border-slate-300 hover:border-[#094cb2] hover:text-[#094cb2] bg-white text-slate-800 font-bold transition shadow-2xs text-xs uppercase tracking-wider font-label"
               >
-                👤 Profile
+                Log In
               </Link>
               <Link
-                href="/assessment"
-                className="px-3.5 py-1.5 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-semibold transition shadow-xs text-xs"
+                href="/register"
+                className="px-3.5 py-1.5 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-bold transition shadow-xs text-xs uppercase tracking-wider font-label"
               >
-                Diagnostic →
+                Register
               </Link>
             </div>
           )}
@@ -194,7 +197,78 @@ export default function HomePage() {
             We quantify your domain pivot feasibility and guide you through an interactive 7-day experiential DAG of real workplace challenges.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-4 font-label">
+          {/* ── Prominent Dual Persona Registration in the Beginning ── */}
+          <div className="pt-4 pb-2 max-w-2xl mx-auto w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+              {/* Student Registration Card */}
+              <div className="bg-white rounded-sm border border-slate-200 hover:border-[#094cb2] p-5 shadow-xs transition group flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="w-8 h-8 rounded-sm bg-blue-50 border border-blue-200 flex items-center justify-center text-lg">
+                      🎓
+                    </span>
+                    <span className="font-label text-[10px] font-bold uppercase tracking-wider text-[#094cb2] bg-blue-50 px-2 py-0.5 rounded-sm">
+                      Track 01
+                    </span>
+                  </div>
+                  <h3 className="font-serif text-lg font-bold text-slate-950 group-hover:text-[#094cb2] transition">
+                    Student Registration
+                  </h3>
+                  <p className="font-sans text-xs text-slate-600 leading-relaxed">
+                    AI cognitive fit diagnostics, 7-day experiential DAG skill trees, and 1:1 mentorship booking.
+                  </p>
+                </div>
+                <div className="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between">
+                  <Link
+                    href="/register/student"
+                    className="font-label text-xs font-bold uppercase tracking-wider text-[#094cb2] group-hover:underline flex items-center gap-1"
+                  >
+                    <span>Register as Student</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Mentor Registration Card */}
+              <div className="bg-white rounded-sm border border-slate-200 hover:border-[#6d5e00] p-5 shadow-xs transition group flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="w-8 h-8 rounded-sm bg-amber-50 border border-amber-200 flex items-center justify-center text-lg text-[#6d5e00]">
+                      ✦
+                    </span>
+                    <span className="font-label text-[10px] font-bold uppercase tracking-wider text-[#6d5e00] bg-amber-50 px-2 py-0.5 rounded-sm">
+                      Track 02
+                    </span>
+                  </div>
+                  <h3 className="font-serif text-lg font-bold text-slate-950 group-hover:text-[#6d5e00] transition">
+                    Mentor Registration
+                  </h3>
+                  <p className="font-sans text-xs text-slate-600 leading-relaxed">
+                    Join vetted practitioner directory, set honorarium rates, and auto-sync Google Meet sessions.
+                  </p>
+                </div>
+                <div className="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between">
+                  <Link
+                    href="/register/mentor"
+                    className="font-label text-xs font-bold uppercase tracking-wider text-[#6d5e00] group-hover:underline flex items-center gap-1"
+                  >
+                    <span>Register as Mentor</span>
+                    <span>→</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Access Bar */}
+            <div className="mt-3 text-center text-xs font-sans text-slate-500">
+              Already have an account?{" "}
+              <Link href="/login" className="font-semibold text-[#094cb2] hover:underline">
+                Log In to your workspace →
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2 font-label">
             <Link
               href="/onboarding"
               className="w-full sm:w-auto px-7 py-3.5 rounded-sm bg-[#094cb2] hover:bg-[#1d63d8] text-white font-bold text-xs uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-2"

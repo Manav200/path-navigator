@@ -111,6 +111,22 @@ export default function LoginPage() {
             <p className="font-sans text-xs text-slate-600 leading-relaxed max-w-xs mx-auto">
               Authenticate to preserve your psychological diagnostic results, domain pivot index, and 7-day experiential learning milestones.
             </p>
+            <div className="pt-2 flex items-center justify-center gap-2 text-xs font-sans text-slate-600">
+              <span>New here?</span>
+              <Link
+                href="/register/student"
+                className="text-[#094cb2] font-semibold hover:underline"
+              >
+                Register as Student
+              </Link>
+              <span>·</span>
+              <Link
+                href="/register/mentor"
+                className="text-[#6d5e00] font-semibold hover:underline"
+              >
+                Register as Mentor
+              </Link>
+            </div>
           </div>
 
           {/* Action CTAs */}

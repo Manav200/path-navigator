@@ -23,20 +23,47 @@ export default function RegisterRoleSelectionPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#f8fafc] text-slate-900 py-16 px-4 sm:px-6 flex flex-col justify-center items-center">
-      <div className="max-w-4xl w-full space-y-10">
+    <main className="min-h-screen bg-[#f8fafc] text-slate-900 py-10 px-4 sm:px-6 flex flex-col justify-between items-center selection:bg-[#fef3c7] selection:text-[#453b00]">
+      {/* Top Header Bar */}
+      <header className="w-full max-w-4xl flex items-center justify-between pb-8 border-b border-slate-200">
+        <Link href="/" className="inline-flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-sm bg-[#094cb2] flex items-center justify-center font-serif text-white font-bold text-sm shadow-xs">
+            PN
+          </div>
+          <div>
+            <span className="font-serif text-lg font-bold tracking-tight text-slate-950 block leading-tight">
+              Path<span className="text-[#094cb2]">Navigate</span>
+            </span>
+            <span className="font-label text-[10px] tracking-widest uppercase text-slate-500 block">
+              Registration Portal
+            </span>
+          </div>
+        </Link>
+
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-slate-500 hidden sm:inline">Already have an account?</span>
+          <Link
+            href="/login"
+            className="px-3.5 py-1.5 rounded-sm border border-slate-300 hover:border-[#094cb2] hover:text-[#094cb2] bg-white text-slate-700 font-label text-xs uppercase font-bold tracking-wider transition shadow-2xs"
+          >
+            Log In
+          </Link>
+        </div>
+      </header>
+
+      <div className="max-w-4xl w-full my-auto py-8 space-y-10">
         {/* Navigation Breadcrumb / Tag */}
         <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-amber-50 border border-[#fde68a] text-[#6d5e00]">
             <span className="font-label text-[11px] font-bold uppercase tracking-widest">
-              ✦ PathNavigate Onboarding
+              ✦ Registration &amp; Onboarding
             </span>
           </div>
           <h1 className="font-serif text-3xl sm:text-5xl font-bold text-slate-950 tracking-tight leading-snug">
-            Join PathNavigate — Choose Your Pathway
+            Choose Your Registration Pathway
           </h1>
           <p className="font-sans text-sm sm:text-base text-slate-600 max-w-xl mx-auto leading-relaxed">
-            Select your primary objective to calibrate your workspace. Whether seeking career direction or sharing practitioner wisdom, your journey begins here.
+            Register as a Student to explore career fit and 7-day experiential skill roadmaps, or join as a Mentor to guide candidates and host 1:1 sessions.
           </p>
         </div>
 
